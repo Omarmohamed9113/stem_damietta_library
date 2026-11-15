@@ -5,236 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STEM New Damietta Library</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- أيقونة افتراضية لمنع خطأ 404 favicon.ico -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    
+    <!-- 1. تحميل مكتبة قاعدة البيانات أولاً -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 2. تحميل كود التشغيل الخاص بنا (استخدمنا defer ليعمل بعد تحميل الصفحة) -->
+    <script src="js/app.js" defer></script>
 </head>
 <body class="light-mode">
 
-    <!-- الشريط العلوي (Navbar) -->
+    <!-- الشريط العلوي -->
     <header class="navbar">
         <div class="nav-brand">
             <span>📚</span>
-            <h1 data-i18n="appTitle">STEM Library</h1>
+            <h1>STEM Library</h1>
         </div>
         <div class="nav-actions">
             <span id="userInfoBadge" class="user-badge hidden"></span>
-            <button id="langToggle" class="btn-outline">عربي</button>
-            <button id="themeToggle" class="btn-outline">🌙</button>
-            <button id="logoutBtn" class="btn-danger hidden" data-i18n="logoutBtn">Logout</button>
+            <button id="logoutBtn" class="btn-danger hidden">Logout</button>
         </div>
     </header>
 
-    <!-- قسم تسجيل الدخول وإنشاء الحساب -->
+    <!-- قسم الدخول والتسجيل -->
     <main id="authSection" class="auth-container">
         <div class="auth-card">
             <div class="auth-tabs">
-                <button id="showLoginBtn" class="auth-tab active" data-i18n="loginTab">Login</button>
-                <button id="showRegisterBtn" class="auth-tab" data-i18n="registerTab">Register</button>
+                <button id="showLoginBtn" class="auth-tab active">Login</button>
+                <button id="showRegisterBtn" class="auth-tab">Register</button>
             </div>
 
-            <div id="authMessage" class="error-msg"></div>
+            <div id="authMessage" class="error-msg" style="margin-bottom: 10px; font-weight: bold;"></div>
 
-            <!-- نموذج تسجيل الدخول -->
+            <!-- نموذج الدخول -->
             <form id="loginForm" class="auth-form">
                 <div class="form-group">
-                    <label data-i18n="emailLabel">Email</label>
-                    <input type="email" id="loginEmail" required placeholder="student@stem.edu.eg">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="student@stemdamietta.moe.edu.eg">
                 </div>
                 <div class="form-group">
-                    <label data-i18n="passwordLabel">Password</label>
+                    <label>Password</label>
                     <input type="password" id="loginPassword" required placeholder="••••••••">
                 </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="loginIsClubMember">
-                    <label for="loginIsClubMember" data-i18n="clubMemberCheck">Login as Library Club Member (Admin)</label>
-                </div>
-                <div id="loginClubPassGroup" class="form-group hidden">
-                    <label data-i18n="clubPassLabel">Club Password</label>
-                    <input type="password" id="loginClubPassword" placeholder="Enter Club Password">
-                </div>
-                <!-- تم إضافة id="loginBtn" هنا -->
-                <button type="submit" id="loginBtn" class="btn-primary full-width" data-i18n="loginBtn">Login</button>
+                <button type="submit" id="loginBtn" class="btn-primary full-width">Login</button>
             </form>
 
-            <!-- نموذج إنشاء حساب جديد -->
+            <!-- نموذج التسجيل -->
             <form id="registerForm" class="auth-form hidden">
                 <div class="form-group">
-                    <label data-i18n="fullNameLabel">Full Name</label>
-                    <input type="text" id="regName" required placeholder="Omar Mohamed">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" required placeholder="Your Name">
                 </div>
                 <div class="form-group">
-                    <label data-i18n="emailLabel">Email</label>
-                    <input type="email" id="regEmail" required placeholder="student@stem.edu.eg">
+                    <label>Email (School Email Only)</label>
+                    <input type="email" id="regEmail" required placeholder="student@stemdamietta.moe.edu.eg">
                 </div>
                 <div class="form-group">
-                    <label data-i18n="classLabel">Grade / Class</label>
-                    <select id="regClass" required>
-                        <option value="Grade 10">Grade 10</option>
-                        <option value="Grade 11">Grade 11</option>
-                        <option value="Grade 12">Grade 12</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="passwordLabel">Password</label>
+                    <label>Password</label>
                     <input type="password" id="regPassword" required placeholder="••••••••">
                 </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="regIsClubMember">
-                    <label for="regIsClubMember" data-i18n="clubMemberCheck">Register as Library Club Member (Admin)</label>
-                </div>
-                <div id="regClubPassGroup" class="form-group hidden">
-                    <label data-i18n="clubPassLabel">Club Password</label>
-                    <input type="password" id="regClubPassword" placeholder="Enter Club Password">
-                </div>
-                <!-- تم إضافة id="signupBtn" هنا -->
-                <button type="submit" id="signupBtn" class="btn-primary full-width" data-i18n="registerBtn">Create Account</button>
+                <button type="submit" id="signupBtn" class="btn-primary full-width">Create Account</button>
             </form>
         </div>
     </main>
 
-    <!-- لوحة تحكم المكتبة الرئيسية -->
+    <!-- لوحة تحكم المكتبة (تظهر بعد الدخول) -->
     <section id="libraryDashboard" class="dashboard-container hidden">
-        <!-- التبويبات الرئيسية -->
-        <div class="tabs-bar">
-            <button class="main-tab active" data-tab="new" data-i18n="tabNew">✨ Latest Additions</button>
-            <button class="main-tab" data-tab="ebooks" data-i18n="tabEbooks">📄 E-Books (PDF)</button>
-            <button class="main-tab" data-tab="physical" data-i18n="tabPhysical">📘 Physical Books</button>
-            <button id="tabReservations" class="main-tab hidden" data-tab="reservations" data-i18n="tabReservations">📋 Reservations</button>
+        <div id="controlsBar" class="controls-bar" style="margin-bottom: 20px;">
+            <button id="openAddEbookModal" class="btn-primary">+ Upload E-Book (PDF)</button>
         </div>
-
-        <!-- شريط البحث والفلترة وأزرار الإضافة -->
-        <div id="controlsBar" class="controls-bar">
-            <div class="search-filters">
-                <input type="text" id="searchInput" placeholder="Search by title or author...">
-                <select id="categoryFilter">
-                    <option value="all" data-i18n="catAll">All Categories</option>
-                    <option value="Science" data-i18n="catScience">Science & Physics</option>
-                    <option value="Math" data-i18n="catMath">Mathematics</option>
-                    <option value="Programming" data-i18n="catProgramming">Programming & CS</option>
-                    <option value="Literature" data-i18n="catLiterature">Literature & Novels</option>
-                    <option value="General" data-i18n="catGeneral">General Knowledge</option>
-                </select>
-            </div>
-            <div class="action-buttons">
-                <button id="openAddEbookModal" class="btn-primary" data-i18n="addEbookBtn">+ Upload E-Book (PDF)</button>
-                <button id="openAddPhysicalModal" class="btn-secondary hidden" data-i18n="addPhysicalBtn">+ Add Physical Book</button>
-            </div>
-        </div>
-
-        <!-- شبكة عرض الكتب -->
-        <div id="booksGrid" class="books-grid"></div>
-
-        <!-- جدول الحجوزات (خاص بأعضاء الجمعية) -->
-        <div id="reservationsView" class="reservations-view hidden">
-            <h2 data-i18n="reservationsTitle">Physical Book Reservations</h2>
-            <div class="table-responsive">
-                <table class="reservations-table">
-                    <thead>
-                        <tr>
-                            <th data-i18n="thBook">Book Title</th>
-                            <th data-i18n="thStudent">Student Name</th>
-                            <th data-i18n="thClass">Class</th>
-                            <th data-i18n="thDate">Date</th>
-                            <th data-i18n="thStatus">Status</th>
-                            <th data-i18n="thAction">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reservationsTableBody"></tbody>
-                </table>
-            </div>
+        <div id="booksGrid" class="books-grid">
+            <h3 style="text-align:center; width:100%;">Welcome to the Library! Books will appear here.</h3>
         </div>
     </section>
 
-    <!-- نافذة (Modal) رفع كتاب إلكتروني PDF -->
+    <!-- نافذة رفع الكتب PDF -->
     <div id="ebookModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 data-i18n="modalEbookTitle">Upload New E-Book (PDF)</h3>
-                <button class="close-modal" data-close="ebookModal">&times;</button>
+                <h3>Upload New E-Book (PDF)</h3>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
             </div>
             <form id="addEbookForm">
                 <div class="form-group">
-                    <label data-i18n="uploaderNameLabel">Your Triple Name</label>
-                    <input type="text" id="ebUploader" required placeholder="e.g. Omar Mohamed Ali">
-                </div>
-                <div class="form-group">
-                    <label data-i18n="bookTitleLabel">Book Title</label>
-                    <input type="text" id="ebTitle" required>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="authorLabel">Author</label>
-                    <input type="text" id="ebAuthor" required>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="categoryLabel">Category</label>
-                    <select id="ebCategory" required>
-                        <option value="Science">Science & Physics</option>
-                        <option value="Math">Mathematics</option>
-                        <option value="Programming">Programming & CS</option>
-                        <option value="Literature">Literature & Novels</option>
-                        <option value="General">General Knowledge</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="descLabel">Short Description</label>
-                    <textarea id="ebDesc" rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="pdfFileLabel">Select PDF File</label>
+                    <label>Select PDF File</label>
                     <input type="file" id="ebFile" accept=".pdf" required>
                 </div>
-                <!-- تم إضافة id="uploadEbookBtn" هنا -->
-                <button type="submit" id="uploadEbookBtn" class="btn-primary full-width" data-i18n="submitBookBtn">Upload Book</button>
+                <button type="submit" id="uploadEbookBtn" class="btn-primary full-width">Upload Book</button>
             </form>
         </div>
     </div>
 
-    <!-- نافذة (Modal) إضافة كتاب ورقي -->
-    <div id="physicalModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 data-i18n="modalPhysicalTitle">Add Physical Library Book</h3>
-                <button class="close-modal" data-close="physicalModal">&times;</button>
-            </div>
-            <form id="addPhysicalForm">
-                <div class="form-group">
-                    <label data-i18n="bookTitleLabel">Book Title</label>
-                    <input type="text" id="phTitle" required>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="authorLabel">Author</label>
-                    <input type="text" id="phAuthor" required>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="categoryLabel">Category</label>
-                    <select id="phCategory" required>
-                        <option value="Science">Science & Physics</option>
-                        <option value="Math">Mathematics</option>
-                        <option value="Programming">Programming & CS</option>
-                        <option value="Literature">Literature & Novels</option>
-                        <option value="General">General Knowledge</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="copiesLabel">Number of Copies</label>
-                    <input type="number" id="phCopies" min="1" value="1" required>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="descLabel">Short Description</label>
-                    <textarea id="phDesc" rows="3" required></textarea>
-                </div>
-                <button type="submit" class="btn-secondary full-width" data-i18n="saveBookBtn">Save to Library</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- 
-      تعديل هام جداً:
-      تم نقل استدعاء مكتبة Supabase ليكون قبل ملف app.js. 
-      هذا ضروري لأن app.js يحتاج إلى قراءة أوامر Supabase بمجرد تشغيله.
-    -->
-<!-- هذا السطر هو الأهم، بدونه سيتوقف الكود فوراً -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/app.js"></script>
 </body>
 </html>
