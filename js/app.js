@@ -1,48 +1,37 @@
-// 1. رسالة اختبار (إذا ظهرت لك على الموقع، فالكود يعمل 100%)
-alert("تم تحديث الموقع بنجاح والكود يعمل الآن!");
+console.log("🚀 جاري بدء تشغيل الموقع...");
 
-// 2. التهيئة والربط مع Supabase
-const supabase = window.supabase;
+// 1. الاتصال بقاعدة البيانات
 const supabaseUrl = 'https://lqnqqzsjlntjkxqoxkyp.supabase.co';
-const supabaseAnonKey = 'sb_publishable_yQj1w7ZDSr1EmndXpta6Bw_nPNxaNs0';
-
-const db = supabase.createClient(supabaseUrl, supabaseAnonKey);
-console.log("تم الربط بنجاح مع قاعدة بيانات مكتبة STEM!");
+const supabaseKey = 'sb_publishable_yQj1w7ZDSr1EmndXpta6Bw_nPNxaNs0';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 const allowedDomain = '@stemdamietta.moe.edu.eg';
 
-// 3. التحكم في الأزرار مباشرة (بدون انتظار)
-const showLoginBtn = document.getElementById('showLoginBtn');
-const showRegisterBtn = document.getElementById('showRegisterBtn');
-const loginForm = document.getElementById('loginForm');
-const registerForm = document.getElementById('registerForm');
-const authMessage = document.getElementById('authMessage');
+// ننتظر حتى تحمل عناصر HTML ثم نشغل الأزرار
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("✅ تم تحميل واجهة الموقع بنجاح.");
 
-if (showLoginBtn && showRegisterBtn) {
-    showLoginBtn.addEventListener('click', () => {
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-        showLoginBtn.classList.add('active');
-        showRegisterBtn.classList.remove('active');
+    // تعريف العناصر
+    const authSection = document.getElementById('authSection');
+    const libraryDashboard = document.getElementById('libraryDashboard');
+    const authMessage = document.getElementById('authMessage');
+    
+    // أزرار التبديل بين الدخول والتسجيل
+    document.getElementById('showLoginBtn').addEventListener('click', () => {
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
         authMessage.innerText = '';
     });
 
-    showRegisterBtn.addEventListener('click', () => {
-        registerForm.classList.remove('hidden');
-        loginForm.classList.add('hidden');
-        showRegisterBtn.classList.add('active');
-        showLoginBtn.classList.remove('active');
+    document.getElementById('showRegisterBtn').addEventListener('click', () => {
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('loginForm').classList.add('hidden');
         authMessage.innerText = '';
     });
-}
 
-// تسجيل حساب جديد
-const signupBtn = document.getElementById('signupBtn');
-if (signupBtn) {
-    signupBtn.addEventListener('click', async (e) => {
+    // 2. كود إنشاء الحساب
+    document.getElementById('signupBtn').addEventListener('click', async (e) => {
         e.preventDefault();
-        
-        const name = document.getElementById('regName').value;
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
 
@@ -52,32 +41,24 @@ if (signupBtn) {
             return;
         }
 
-        signupBtn.innerText = 'جاري التسجيل...';
-        
-        const { data, error } = await db.auth.signUp({
-            email: email,
-            password: password,
-            options: { data: { full_name: name } }
-        });
+        authMessage.style.color = 'blue';
+        authMessage.innerText = 'جاري التسجيل...';
+
+        const { data, error } = await supabase.auth.signUp({ email, password });
 
         if (error) {
             authMessage.style.color = 'red';
-            authMessage.innerText = 'خطأ: ' + error.message;
+            authMessage.innerText = error.message;
         } else {
             authMessage.style.color = 'green';
-            authMessage.innerText = 'تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.';
+            authMessage.innerText = 'تم إنشاء الحساب! يمكنك الآن تسجيل الدخول.';
             document.getElementById('registerForm').reset();
         }
-        signupBtn.innerText = 'Create Account';
     });
-}
 
-// تسجيل الدخول
-const loginBtn = document.getElementById('loginBtn');
-if (loginBtn) {
-    loginBtn.addEventListener('click', async (e) => {
+    // 3. كود تسجيل الدخول
+    document.getElementById('loginBtn').addEventListener('click', async (e) => {
         e.preventDefault();
-        
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
@@ -87,38 +68,71 @@ if (loginBtn) {
             return;
         }
 
-        loginBtn.innerText = 'جاري الدخول...';
+        authMessage.style.color = 'blue';
+        authMessage.innerText = 'جاري الدخول...';
 
-        const { data, error } = await db.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
         if (error) {
             authMessage.style.color = 'red';
             authMessage.innerText = 'الإيميل أو كلمة المرور غير صحيحة.';
-            loginBtn.innerText = 'Login';
         }
     });
-}
 
-// مراقبة حالة الدخول (لإظهار وإخفاء المكتبة)
-db.auth.onAuthStateChange((event, session) => {
-    const authSection = document.getElementById('authSection');
-    const libraryDashboard = document.getElementById('libraryDashboard');
-    const userInfoBadge = document.getElementById('userInfoBadge');
-    const logoutBtn = document.getElementById('logoutBtn');
+    // 4. كود تسجيل الخروج
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await supabase.auth.signOut();
+    });
 
-    if (session) {
-        authSection.classList.add('hidden');
-        libraryDashboard.classList.remove('hidden');
-        logoutBtn.classList.remove('hidden');
-        userInfoBadge.classList.remove('hidden');
-        userInfoBadge.innerText = '👤 ' + session.user.email.split('@')[0];
-    } else {
-        if(authSection) authSection.classList.remove('hidden');
-        if(libraryDashboard) libraryDashboard.classList.add('hidden');
-        if(logoutBtn) logoutBtn.classList.add('hidden');
-        if(userInfoBadge) userInfoBadge.classList.add('hidden');
-    }
+    // 5. مراقبة حالة المستخدم (من مسجل دخوله ومن لا)
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            // إخفاء صفحة الدخول وفتح المكتبة
+            authSection.classList.add('hidden');
+            libraryDashboard.classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('userInfoBadge').classList.remove('hidden');
+            document.getElementById('userInfoBadge').innerText = '👤 ' + session.user.email.split('@')[0];
+        } else {
+            // العكس
+            authSection.classList.remove('hidden');
+            libraryDashboard.classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('userInfoBadge').classList.add('hidden');
+        }
+    });
+
+    // 6. التحكم في نافذة رفع الكتب
+    document.getElementById('openAddEbookModal').addEventListener('click', () => {
+        document.getElementById('ebookModal').classList.remove('hidden');
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+        document.getElementById('ebookModal').classList.add('hidden');
+    });
+
+    // 7. رفع ملف الـ PDF لقاعدة البيانات
+    document.getElementById('uploadEbookBtn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const file = document.getElementById('ebFile').files[0];
+        if (!file) return alert("اختر ملف PDF أولاً");
+
+        const btn = document.getElementById('uploadEbookBtn');
+        btn.innerText = "جاري الرفع...";
+        btn.disabled = true;
+
+        const fileName = `${Date.now()}_${file.name}`;
+        const { data, error } = await supabase.storage.from('books').upload(fileName, file);
+
+        if (error) {
+            alert("خطأ في الرفع: " + error.message);
+        } else {
+            alert("تم رفع الكتاب بنجاح!");
+            document.getElementById('ebookModal').classList.add('hidden');
+            document.getElementById('addEbookForm').reset();
+        }
+
+        btn.innerText = "Upload Book";
+        btn.disabled = false;
+    });
 });
