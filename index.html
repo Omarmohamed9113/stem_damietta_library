@@ -2,98 +2,84 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STEM New Damietta Library</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
-    
-    <!-- 1. تحميل مكتبة قاعدة البيانات أولاً -->
+    <title>STEM Library Test</title>
+    <!-- 1. تحميل مكتبة Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- 2. تحميل كود التشغيل الخاص بنا (استخدمنا defer ليعمل بعد تحميل الصفحة) -->
-    <script src="js/app.js" defer></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .hidden { display: none; }
+        .box { border: 1px solid #ccc; padding: 20px; border-radius: 10px; max-width: 400px; }
+        button { padding: 10px; margin-top: 10px; cursor: pointer; }
+        input { padding: 10px; margin-top: 5px; width: 90%; display: block; }
+    </style>
 </head>
-<body class="light-mode">
+<body>
 
-    <!-- الشريط العلوي -->
-    <header class="navbar">
-        <div class="nav-brand">
-            <span>📚</span>
-            <h1>STEM Library</h1>
-        </div>
-        <div class="nav-actions">
-            <span id="userInfoBadge" class="user-badge hidden"></span>
-            <button id="logoutBtn" class="btn-danger hidden">Logout</button>
-        </div>
-    </header>
+    <h2>اختبار مكتبة STEM 🚀</h2>
+    <h4 id="statusMessage" style="color: blue;">جاري فحص الأزرار...</h4>
 
-    <!-- قسم الدخول والتسجيل -->
-    <main id="authSection" class="auth-container">
-        <div class="auth-card">
-            <div class="auth-tabs">
-                <button id="showLoginBtn" class="auth-tab active">Login</button>
-                <button id="showRegisterBtn" class="auth-tab">Register</button>
-            </div>
-
-            <div id="authMessage" class="error-msg" style="margin-bottom: 10px; font-weight: bold;"></div>
-
-            <!-- نموذج الدخول -->
-            <form id="loginForm" class="auth-form">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" required placeholder="student@stemdamietta.moe.edu.eg">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" required placeholder="••••••••">
-                </div>
-                <button type="submit" id="loginBtn" class="btn-primary full-width">Login</button>
-            </form>
-
-            <!-- نموذج التسجيل -->
-            <form id="registerForm" class="auth-form hidden">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="regName" required placeholder="Your Name">
-                </div>
-                <div class="form-group">
-                    <label>Email (School Email Only)</label>
-                    <input type="email" id="regEmail" required placeholder="student@stemdamietta.moe.edu.eg">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="regPassword" required placeholder="••••••••">
-                </div>
-                <button type="submit" id="signupBtn" class="btn-primary full-width">Create Account</button>
-            </form>
-        </div>
-    </main>
-
-    <!-- لوحة تحكم المكتبة (تظهر بعد الدخول) -->
-    <section id="libraryDashboard" class="dashboard-container hidden">
-        <div id="controlsBar" class="controls-bar" style="margin-bottom: 20px;">
-            <button id="openAddEbookModal" class="btn-primary">+ Upload E-Book (PDF)</button>
-        </div>
-        <div id="booksGrid" class="books-grid">
-            <h3 style="text-align:center; width:100%;">Welcome to the Library! Books will appear here.</h3>
-        </div>
-    </section>
-
-    <!-- نافذة رفع الكتب PDF -->
-    <div id="ebookModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Upload New E-Book (PDF)</h3>
-                <button class="close-modal" id="closeModalBtn">&times;</button>
-            </div>
-            <form id="addEbookForm">
-                <div class="form-group">
-                    <label>Select PDF File</label>
-                    <input type="file" id="ebFile" accept=".pdf" required>
-                </div>
-                <button type="submit" id="uploadEbookBtn" class="btn-primary full-width">Upload Book</button>
-            </form>
-        </div>
+    <!-- صندوق تسجيل الدخول -->
+    <div id="loginBox" class="box">
+        <h3>تسجيل الدخول</h3>
+        <input type="email" id="emailInput" placeholder="student@stemdamietta.moe.edu.eg">
+        <input type="password" id="passInput" placeholder="Password">
+        <button id="loginBtn">دخول للمكتبة</button>
     </div>
 
+    <!-- لوحة المكتبة (تكون مخفية في البداية) -->
+    <div id="libraryBox" class="box hidden">
+        <h3 style="color: green;">🎉 أهلاً بك في المكتبة! تم الدخول بنجاح.</h3>
+        <button id="logoutBtn">تسجيل الخروج</button>
+    </div>
+
+    <!-- 2. الكود البرمجي (وضعناه في النهاية لضمان عمل الأزرار) -->
+    <script>
+        // تغيير النص لتأكيد أن الجافاسكريبت يعمل
+        document.getElementById('statusMessage').innerText = "✅ الجافاسكريبت يعمل والأزرار جاهزة!";
+        document.getElementById('statusMessage').style.color = "green";
+
+        // الاتصال بقاعدة البيانات
+        const supabaseUrl = 'https://lqnqqzsjlntjkxqoxkyp.supabase.co';
+        const supabaseKey = 'sb_publishable_yQj1w7ZDSr1EmndXpta6Bw_nPNxaNs0';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        const allowedDomain = '@stemdamietta.moe.edu.eg';
+
+        // برمجة زر الدخول
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passInput').value;
+
+            if (!email.endsWith(allowedDomain)) {
+                alert('عذراً! استخدم إيميل مدرسة STEM.');
+                return;
+            }
+
+            document.getElementById('loginBtn').innerText = 'جاري الدخول...';
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                alert('خطأ: الإيميل أو الباسورد غير صحيح! أو الحساب غير موجود.');
+                document.getElementById('loginBtn').innerText = 'دخول للمكتبة';
+            }
+        });
+
+        // برمجة زر الخروج
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await supabase.auth.signOut();
+        });
+
+        // مراقبة حالة الدخول (لإخفاء وإظهار المكتبة)
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                document.getElementById('loginBox').classList.add('hidden');
+                document.getElementById('libraryBox').classList.remove('hidden');
+            } else {
+                document.getElementById('loginBox').classList.remove('hidden');
+                document.getElementById('libraryBox').classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
